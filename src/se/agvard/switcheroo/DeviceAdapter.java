@@ -13,6 +13,11 @@ import android.widget.TextView;
 
 public class DeviceAdapter extends BaseAdapter {
 
+	// TODO Use proper state drawables for buttons
+	private static final int COLOR_ON = 0xff80ff80;
+	private static final int COLOR_OFF = 0xffff8080;
+	private static final int COLOR_DEFAULT = 0xff808080;
+
 	private ArrayList<Device> mDevices;
 	private LayoutInflater mLayoutInflator;
 
@@ -33,36 +38,55 @@ public class DeviceAdapter extends BaseAdapter {
 
 	@Override
 	public long getItemId(int position) {
-		return mDevices.get(position).id;
+		return mDevices.get(position).getId();
 	}
 
 	@Override
-	public View getView(final int position, View convertView, ViewGroup parent) {
+	public View getView(int position, View convertView, ViewGroup parent) {
 		if (convertView == null) {
 			convertView = mLayoutInflator.inflate(R.layout.device, parent,
 					false);
 		}
 
-		((TextView) convertView.findViewById(R.id.name)).setText(mDevices
-				.get(position).name);
+		final Device device = mDevices.get(position);
 
-		((Button) convertView.findViewById(R.id.on))
-				.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						new VoidDeviceCommand().execute(mDevices.get(position).id, VoidDeviceCommand.COMMAND_ON);
-					}
-				});
+		((TextView) convertView.findViewById(R.id.name)).setText(mDevices.get(
+				position).getName());
 
-		((Button) convertView.findViewById(R.id.off))
-				.setOnClickListener(new OnClickListener() {
+		// TODO Listeners in view inside adapter view
+
+		Button buttonOn = (Button) convertView.findViewById(R.id.on);
+		buttonOn.setBackgroundColor(device.isOn() ? COLOR_ON : COLOR_DEFAULT);
+		buttonOn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				new VoidDeviceCommand() {
 					@Override
-					public void onClick(View v) {
-						new VoidDeviceCommand().execute(mDevices.get(position).id, VoidDeviceCommand.COMMAND_OFF);
-					}
-				});
+					protected void onPostExecute(Void result) {
+						// TODO Check result for success
+						device.setOn(true);
+						notifyDataSetChanged();
+					};
+				}.execute(device.getId(), VoidDeviceCommand.COMMAND_ON);
+			}
+		});
+
+		Button buttonOff = (Button) convertView.findViewById(R.id.off);
+		buttonOff.setBackgroundColor(device.isOn() ? COLOR_DEFAULT : COLOR_OFF);
+		buttonOff.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				new VoidDeviceCommand() {
+					@Override
+					protected void onPostExecute(Void result) {
+						// TODO Check result for success
+						device.setOn(false);
+						notifyDataSetChanged();
+					};
+				}.execute(device.getId(), VoidDeviceCommand.COMMAND_OFF);
+			}
+		});
 
 		return convertView;
 	}
-
 }
