@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, SwitcherooActivity!</string>
+    <string name="app_name">Switcheroo</string>
+    <string name="refresh">Refresh</string>
+    <string name="on">on</string>
+    <string name="off">off</string>
+
+</resources>
