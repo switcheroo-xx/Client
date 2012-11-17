@@ -26,9 +26,10 @@ public class VoidDeviceCommand extends AsyncTask<Object, Void, RequestResult> {
 
 		URL url = null;
 		try {
-			url = new URL("http", "andreas.agvard.se", 1443, "?command="
-					+ command + "&device=" + deviceId);
-			System.out.println("ANDREAS " + url);
+			GlobalSettings globalSettings = GlobalSettings.get();
+			url = new URL("http", globalSettings.getHost(),
+					globalSettings.getPort(), "?command=" + command
+							+ "&device=" + deviceId);
 		} catch (MalformedURLException e) {
 			return new RequestResult(RequestResult.MALFORMED_URL);
 		}

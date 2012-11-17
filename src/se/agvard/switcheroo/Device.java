@@ -2,8 +2,8 @@ package se.agvard.switcheroo;
 
 class Device {
 
-	private int mId;
-	private String mName;
+	private final int mId;
+	private final String mName;
 	private boolean mOn;
 
 	Device(int id, String name, boolean on) {

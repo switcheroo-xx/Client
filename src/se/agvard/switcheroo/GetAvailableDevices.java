@@ -36,7 +36,9 @@ class GetAvailableDevices extends
 
 		URL url = null;
 		try {
-			url = new URL("http://andreas.agvard.se:1443/?command=list");
+			GlobalSettings globalSettings = GlobalSettings.get();
+			url = new URL("http", globalSettings.getHost(),
+					globalSettings.getPort(), "?command=list");
 		} catch (MalformedURLException e) {
 			return new GetAvailableDevicesResult(RequestResult.MALFORMED_URL);
 		}

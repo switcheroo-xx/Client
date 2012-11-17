@@ -20,10 +20,13 @@ public class DeviceAdapter extends BaseAdapter {
 
 	private ArrayList<Device> mDevices;
 	private LayoutInflater mLayoutInflator;
+	private ShowErrorDialog mShowErrorDialog;
 
-	public DeviceAdapter(Context context, ArrayList<Device> devices) {
+	public DeviceAdapter(Context context, ArrayList<Device> devices,
+			ShowErrorDialog showErrorDialog) {
 		mLayoutInflator = LayoutInflater.from(context);
 		mDevices = devices;
+		mShowErrorDialog = showErrorDialog;
 	}
 
 	@Override
@@ -67,8 +70,8 @@ public class DeviceAdapter extends BaseAdapter {
 							device.setOn(true);
 							notifyDataSetChanged();
 						} else {
-							// TODO Handle gracefully
-							throw new RuntimeException(result.getErrorText());
+							mShowErrorDialog.showErrorDialog(result
+									.getErrorText());
 						}
 					};
 				}.execute(device.getId(), VoidDeviceCommand.COMMAND_ON);
@@ -87,8 +90,8 @@ public class DeviceAdapter extends BaseAdapter {
 							device.setOn(false);
 							notifyDataSetChanged();
 						} else {
-							// TODO Handle gracefully
-							throw new RuntimeException(result.getErrorText());
+							mShowErrorDialog.showErrorDialog(result
+									.getErrorText());
 						}
 					};
 				}.execute(device.getId(), VoidDeviceCommand.COMMAND_OFF);
