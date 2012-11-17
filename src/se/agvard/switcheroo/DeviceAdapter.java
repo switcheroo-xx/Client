@@ -13,10 +13,10 @@ import android.widget.TextView;
 
 public class DeviceAdapter extends BaseAdapter {
 
-	// TODO Use proper state drawables for buttons
+	// TODO Move to resources
 	private static final int COLOR_ON = 0xff80ff80;
 	private static final int COLOR_OFF = 0xffff8080;
-	private static final int COLOR_DEFAULT = 0xff808080;
+	private static final int COLOR_DEFAULT = 0xffc0c0c0;
 
 	private ArrayList<Device> mDevices;
 	private LayoutInflater mLayoutInflator;
@@ -56,32 +56,40 @@ public class DeviceAdapter extends BaseAdapter {
 		// TODO Listeners in view inside adapter view
 
 		Button buttonOn = (Button) convertView.findViewById(R.id.on);
-		buttonOn.setBackgroundColor(device.isOn() ? COLOR_ON : COLOR_DEFAULT);
+		buttonOn.setTextColor(device.isOn() ? COLOR_ON : COLOR_DEFAULT);
 		buttonOn.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				new VoidDeviceCommand() {
 					@Override
-					protected void onPostExecute(Void result) {
-						// TODO Check result for success
-						device.setOn(true);
-						notifyDataSetChanged();
+					protected void onPostExecute(RequestResult result) {
+						if (result.success()) {
+							device.setOn(true);
+							notifyDataSetChanged();
+						} else {
+							// TODO Handle gracefully
+							throw new RuntimeException(result.getErrorText());
+						}
 					};
 				}.execute(device.getId(), VoidDeviceCommand.COMMAND_ON);
 			}
 		});
 
 		Button buttonOff = (Button) convertView.findViewById(R.id.off);
-		buttonOff.setBackgroundColor(device.isOn() ? COLOR_DEFAULT : COLOR_OFF);
+		buttonOff.setTextColor(device.isOn() ? COLOR_DEFAULT : COLOR_OFF);
 		buttonOff.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				new VoidDeviceCommand() {
 					@Override
-					protected void onPostExecute(Void result) {
-						// TODO Check result for success
-						device.setOn(false);
-						notifyDataSetChanged();
+					protected void onPostExecute(RequestResult result) {
+						if (result.success()) {
+							device.setOn(false);
+							notifyDataSetChanged();
+						} else {
+							// TODO Handle gracefully
+							throw new RuntimeException(result.getErrorText());
+						}
 					};
 				}.execute(device.getId(), VoidDeviceCommand.COMMAND_OFF);
 			}

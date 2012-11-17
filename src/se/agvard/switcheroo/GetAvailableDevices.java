@@ -10,21 +10,35 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import se.agvard.switcheroo.GetAvailableDevices.GetAvailableDevicesResult;
 import android.os.AsyncTask;
 import android.util.Log;
 
-abstract class GetAvailableDevices extends
-		AsyncTask<Void, Void, ArrayList<Device>> {
+class GetAvailableDevices extends
+		AsyncTask<Void, Void, GetAvailableDevicesResult> {
+
+	public class GetAvailableDevicesResult extends RequestResult {
+		public ArrayList<Device> devices;
+
+		private GetAvailableDevicesResult(String errorText) {
+			super(errorText);
+		}
+
+		private GetAvailableDevicesResult(ArrayList<Device> devices) {
+			super();
+			this.devices = devices;
+		}
+	}
 
 	@Override
-	protected ArrayList<Device> doInBackground(Void... params) {
+	protected GetAvailableDevicesResult doInBackground(Void... params) {
 		Log.v(Util.tag(this), "Background task started.");
 
 		URL url = null;
 		try {
 			url = new URL("http://andreas.agvard.se:1443/?command=list");
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			return new GetAvailableDevicesResult(RequestResult.MALFORMED_URL);
 		}
 
 		BufferedReader in = null;
@@ -37,10 +51,12 @@ abstract class GetAvailableDevices extends
 				resLines.add(inLine);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			return new GetAvailableDevicesResult(RequestResult.IO_OPEN);
 		} finally {
 			try {
-				in.close();
+				if (in != null) {
+					in.close();
+				}
 			} catch (IOException e) {
 				// NOP
 			}
@@ -53,8 +69,7 @@ abstract class GetAvailableDevices extends
 
 		ArrayList<Device> devices = new ArrayList<Device>(nbrOfDevices);
 		for (int i = 0; i < nbrOfDevices; ++i) {
-			StringTokenizer st = new StringTokenizer(resLines.get(i + 3),
-					"\t");
+			StringTokenizer st = new StringTokenizer(resLines.get(i + 3), "\t");
 
 			int id = Integer.parseInt(st.nextToken());
 			String name = st.nextToken();
@@ -67,8 +82,6 @@ abstract class GetAvailableDevices extends
 
 		Log.v(Util.tag(this), "Background task finished.");
 
-		return devices;
+		return new GetAvailableDevicesResult(devices);
 	}
-
-	abstract protected void onPostExecute(ArrayList<Device> result);
 }
