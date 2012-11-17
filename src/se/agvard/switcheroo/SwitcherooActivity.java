@@ -50,8 +50,9 @@ public class SwitcherooActivity extends Activity implements ShowErrorDialog {
 				}
 
 				if (result.success()) {
-					DeviceAdapter adapter = new DeviceAdapter(getBaseContext(),
-							result.devices, SwitcherooActivity.this);
+					DeviceAdapter adapter = new DeviceAdapter(
+							getBaseContext(), result.deviceListItems,
+							SwitcherooActivity.this);
 					mListDevices.setAdapter(adapter);
 				} else {
 					showErrorDialog(result.getErrorText());

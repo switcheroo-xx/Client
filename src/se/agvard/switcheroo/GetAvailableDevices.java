@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -18,15 +19,16 @@ class GetAvailableDevices extends
 		AsyncTask<Void, Void, GetAvailableDevicesResult> {
 
 	public class GetAvailableDevicesResult extends RequestResult {
-		public ArrayList<Device> devices;
+		public ArrayList<DeviceListItem> deviceListItems;
 
 		private GetAvailableDevicesResult(String errorText) {
 			super(errorText);
 		}
 
-		private GetAvailableDevicesResult(ArrayList<Device> devices) {
+		public GetAvailableDevicesResult(
+				ArrayList<DeviceListItem> deviceListItems) {
 			super();
-			this.devices = devices;
+			this.deviceListItems = deviceListItems;
 		}
 	}
 
@@ -64,26 +66,50 @@ class GetAvailableDevices extends
 			}
 		}
 
-		// Get available devices
+		// Get number of available devices from server
 		int lastIndexOfSpace = resLines.get(2).lastIndexOf(" ");
 		final int nbrOfDevices = Integer.parseInt(resLines.get(2).substring(
 				lastIndexOfSpace + 1));
 
-		ArrayList<Device> devices = new ArrayList<Device>(nbrOfDevices);
+		// Get device information from server
+		HashMap<String, LinkedList<Device>> roomMap = new HashMap<String, LinkedList<Device>>();
 		for (int i = 0; i < nbrOfDevices; ++i) {
+			// Parse device
 			StringTokenizer st = new StringTokenizer(resLines.get(i + 3), "\t");
-
 			int id = Integer.parseInt(st.nextToken());
-			String name = st.nextToken();
+			String roomAndName = st.nextToken();
+			String roomLabel = roomAndName.substring(0,
+					roomAndName.indexOf(": "));
+			String deviceLabel = roomAndName.substring(roomAndName
+					.indexOf(": ") + 2);
 			String status = st.nextToken();
-			Log.v(Util.tag(this), "id <" + id + ">, name <" + name
-					+ ">, status <" + status + ">");
 			boolean on = status.equals("ON");
-			devices.add(new Device(id, name, on));
+			Device device = new Device(id, deviceLabel, on);
+
+			Log.v(Util.tag(this), "id <" + id + ">, room and name <"
+					+ roomAndName + ">, status <" + status + ">");
+
+			// room -> id
+			LinkedList<Device> roomIds = roomMap.get(roomLabel);
+			if (roomIds == null) {
+				roomIds = new LinkedList<Device>();
+				roomMap.put(roomLabel, roomIds);
+			}
+			roomIds.add(device);
 		}
 
-		Log.v(Util.tag(this), "Background task finished.");
+		// Create list of rooms and devices
+		ArrayList<DeviceListItem> deviceListItems = new ArrayList<DeviceListItem>();
+		for (String roomLabel : roomMap.keySet()) {
+			LinkedList<Device> devices = roomMap.get(roomLabel);
+			deviceListItems.add(new Room(roomLabel, devices));
+			for (Device device : devices) {
+				deviceListItems.add(device);
+			}
+		}
 
-		return new GetAvailableDevicesResult(devices);
+		Log.v(Util.tag(this), "Background task finished. ");
+
+		return new GetAvailableDevicesResult(deviceListItems);
 	}
 }

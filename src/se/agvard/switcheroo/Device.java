@@ -1,14 +1,14 @@
 package se.agvard.switcheroo;
 
-class Device {
+class Device implements DeviceListItem {
 
 	private final int mId;
-	private final String mName;
+	private final String mLabel;
 	private boolean mOn;
 
-	Device(int id, String name, boolean on) {
+	Device(int id, String label, boolean on) {
 		mId = id;
-		mName = name;
+		mLabel = label;
 		mOn = on;
 	}
 
@@ -16,15 +16,25 @@ class Device {
 		return mId;
 	}
 
-	public String getName() {
-		return mName;
+	public String getLabel() {
+		return mLabel;
 	}
 
-	public boolean isOn() {
-		return mOn;
+	public Status getStatus() {
+		return mOn ? Status.ON : Status.OFF;
 	}
 
 	public void setOn(boolean on) {
 		mOn = on;
+	}
+
+	@Override
+	public boolean isOn() {
+		return mOn;
+	}
+
+	@Override
+	public boolean isOff() {
+		return !mOn;
 	}
 }
