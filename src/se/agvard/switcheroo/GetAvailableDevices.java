@@ -75,10 +75,25 @@ class GetAvailableDevices extends AsyncTask<Void, Void, GetAvailableDevicesResul
             StringTokenizer st = new StringTokenizer(resLines.get(i + 3), "\t");
             int id = Integer.parseInt(st.nextToken());
             String roomAndName = st.nextToken();
-            String roomLabel = roomAndName.substring(0, roomAndName.indexOf(": "));
-            String deviceLabel = roomAndName.substring(roomAndName.indexOf(": ") + 2);
+
+            // TODO Handle case without room
+            int roomNameDividerIndex = roomAndName.indexOf(": ");
+            String roomLabel;
+            String deviceLabel;
+            if (roomNameDividerIndex == -1) {
+                roomLabel = "Other"; // TODO String
+                deviceLabel = roomAndName;
+            } else {
+                roomLabel = roomAndName.substring(0, roomNameDividerIndex);
+                deviceLabel = roomAndName.substring(roomNameDividerIndex + 2);
+            }
+
             String status = st.nextToken();
             boolean on = status.equals("ON");
+            if (!on && !status.equals("OFF")) {
+                // TODO Support non on/off devices (such as dimmed)
+                continue;
+            }
             Device device = new Device(id, deviceLabel, on);
 
             Log.v(Util.tag(this), "id <" + id + ">, room and name <" + roomAndName + ">, status <"
