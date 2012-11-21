@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import android.os.AsyncTask;
 
 /**
@@ -27,15 +29,19 @@ public class VoidDeviceCommand extends AsyncTask<Object, Void, RequestResult> {
         URL url = null;
         try {
             GlobalSettings globalSettings = GlobalSettings.get();
-            url = new URL("http", globalSettings.getHost(), globalSettings.getPort(), "?command="
+            url = new URL("https", globalSettings.getHost(), globalSettings.getPort(), "?command="
                     + command + "&device=" + deviceId);
         } catch (MalformedURLException e) {
             return new RequestResult(RequestResult.MALFORMED_URL);
         }
 
         InputStream is = null;
+        HttpsURLConnection connection = null;
         try {
-            is = url.openStream();
+            connection = (HttpsURLConnection) url.openConnection();
+            connection.setHostnameVerifier(Util.createDefaultHostnameVerifier());
+            connection.setSSLSocketFactory(Util.createDefaultSSLContext().getSocketFactory());
+            is = connection.getInputStream();
         } catch (IOException e) {
             return new RequestResult(RequestResult.IO_OPEN);
         } finally {
@@ -45,6 +51,9 @@ public class VoidDeviceCommand extends AsyncTask<Object, Void, RequestResult> {
                 } catch (IOException e) {
                     // NOP
                 }
+            }
+            if (connection != null) {
+                connection.disconnect();
             }
         }
 

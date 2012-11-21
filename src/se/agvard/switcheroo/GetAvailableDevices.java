@@ -11,6 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import se.agvard.switcheroo.GetAvailableDevices.GetAvailableDevicesResult;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -37,22 +39,27 @@ class GetAvailableDevices extends AsyncTask<Void, Void, GetAvailableDevicesResul
         URL url = null;
         try {
             GlobalSettings globalSettings = GlobalSettings.get();
-            url = new URL("http", globalSettings.getHost(), globalSettings.getPort(),
+            url = new URL("https", globalSettings.getHost(), globalSettings.getPort(),
                     "?command=list");
         } catch (MalformedURLException e) {
             return new GetAvailableDevicesResult(RequestResult.MALFORMED_URL);
         }
 
         BufferedReader in = null;
+        HttpsURLConnection connection = null;
         final List<String> resLines = new LinkedList<String>();
         try {
-            in = new BufferedReader(new InputStreamReader(url.openStream()));
+            connection = (HttpsURLConnection) url.openConnection();
+            connection.setHostnameVerifier(Util.createDefaultHostnameVerifier());
+            connection.setSSLSocketFactory(Util.createDefaultSSLContext().getSocketFactory());
+            in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
             String inLine;
             while ((inLine = in.readLine()) != null) {
                 resLines.add(inLine);
             }
         } catch (IOException e) {
+            e.printStackTrace();
             return new GetAvailableDevicesResult(RequestResult.IO_OPEN);
         } finally {
             try {
@@ -61,6 +68,9 @@ class GetAvailableDevices extends AsyncTask<Void, Void, GetAvailableDevicesResul
                 }
             } catch (IOException e) {
                 // NOP
+            }
+            if (connection != null) {
+                connection.disconnect();
             }
         }
 
