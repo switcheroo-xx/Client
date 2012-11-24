@@ -104,8 +104,11 @@ public class SwitcherooActivity extends Activity implements ShowErrorDialog {
                     port = 0;
                 }
 
+                String password = ((EditText) mDialog.findViewById(R.id.password)).getText()
+                        .toString();
+
                 GlobalSettings globalSettings = GlobalSettings.get();
-                globalSettings.set(host, port);
+                globalSettings.set(host, port, password);
 
                 dialog.dismiss();
                 mDialog = null;
@@ -126,6 +129,7 @@ public class SwitcherooActivity extends Activity implements ShowErrorDialog {
         GlobalSettings globalSettings = GlobalSettings.get();
         ((EditText) mDialog.findViewById(R.id.host)).setText(globalSettings.getHost());
         final EditText editPort = ((EditText) mDialog.findViewById(R.id.port));
+        ((EditText) mDialog.findViewById(R.id.password)).setText(globalSettings.getPassword());
         editPort.setText(Integer.toString(globalSettings.getPort()));
     }
 

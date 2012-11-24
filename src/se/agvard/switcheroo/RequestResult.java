@@ -8,6 +8,9 @@ public class RequestResult {
     // TODO Extract to resource file
     public static final String IO_OPEN = "Failed to open connection";
 
+    // TODO Extract to resource file
+    public static final String IO_PARSE = "Failed to parse server result";
+
     /* Error text */
     private String mErrorText;
 

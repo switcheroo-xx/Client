@@ -1,5 +1,6 @@
 package se.agvard.switcheroo;
 
+import java.io.UnsupportedEncodingException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -11,6 +12,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
+import android.util.Base64;
 
 public class Util {
 
@@ -64,4 +67,9 @@ public class Util {
         };
     }
 
+    public static String createDefaultAuthorizationHeader(String password)
+            throws UnsupportedEncodingException {
+        return "Basic "
+                + Base64.encodeToString(("" + ":" + password).getBytes("UTF-8"), Base64.NO_WRAP);
+    }
 }

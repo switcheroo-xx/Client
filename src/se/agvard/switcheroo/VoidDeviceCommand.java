@@ -26,9 +26,10 @@ public class VoidDeviceCommand extends AsyncTask<Object, Void, RequestResult> {
             throw new IllegalArgumentException();
         }
 
+        GlobalSettings globalSettings = GlobalSettings.get();
+
         URL url = null;
         try {
-            GlobalSettings globalSettings = GlobalSettings.get();
             url = new URL("https", globalSettings.getHost(), globalSettings.getPort(), "?command="
                     + command + "&device=" + deviceId);
         } catch (MalformedURLException e) {
@@ -39,6 +40,8 @@ public class VoidDeviceCommand extends AsyncTask<Object, Void, RequestResult> {
         HttpsURLConnection connection = null;
         try {
             connection = (HttpsURLConnection) url.openConnection();
+            connection.setRequestProperty("Authorization",
+                    Util.createDefaultAuthorizationHeader(globalSettings.getPassword()));
             connection.setHostnameVerifier(Util.createDefaultHostnameVerifier());
             connection.setSSLSocketFactory(Util.createDefaultSSLContext().getSocketFactory());
             is = connection.getInputStream();
