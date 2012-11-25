@@ -39,11 +39,8 @@ public class VoidDeviceCommand extends AsyncTask<Object, Void, RequestResult> {
         InputStream is = null;
         HttpsURLConnection connection = null;
         try {
-            connection = (HttpsURLConnection) url.openConnection();
-            connection.setRequestProperty("Authorization",
-                    Util.createDefaultAuthorizationHeader(globalSettings.getPassword()));
-            connection.setHostnameVerifier(Util.createDefaultHostnameVerifier());
-            connection.setSSLSocketFactory(Util.createDefaultSSLContext().getSocketFactory());
+
+            connection = Util.openHttpsURLConnection(url, globalSettings.getPassword());
             is = connection.getInputStream();
         } catch (IOException e) {
             return new RequestResult(RequestResult.IO_OPEN);

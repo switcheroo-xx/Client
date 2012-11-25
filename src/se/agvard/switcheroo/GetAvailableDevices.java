@@ -50,11 +50,7 @@ class GetAvailableDevices extends AsyncTask<Void, Void, GetAvailableDevicesResul
         HttpsURLConnection connection = null;
         final List<String> resLines = new LinkedList<String>();
         try {
-            connection = (HttpsURLConnection) url.openConnection();
-            connection.setRequestProperty("Authorization",
-                    Util.createDefaultAuthorizationHeader(globalSettings.getPassword()));
-            connection.setHostnameVerifier(Util.createDefaultHostnameVerifier());
-            connection.setSSLSocketFactory(Util.createDefaultSSLContext().getSocketFactory());
+            connection = Util.openHttpsURLConnection(url, globalSettings.getPassword());
             in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
             String inLine;

@@ -1,6 +1,8 @@
 package se.agvard.switcheroo;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -8,6 +10,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
@@ -22,7 +25,7 @@ public class Util {
     }
 
     /** Create a very trusting ssl context */
-    public static SSLContext createDefaultSSLContext() {
+    private static SSLContext createDefaultSSLContext() {
         SSLContext ctx = null;
 
         try {
@@ -58,7 +61,7 @@ public class Util {
     }
 
     /** Create a very trusting hostname verifier */
-    public static HostnameVerifier createDefaultHostnameVerifier() {
+    private static HostnameVerifier createDefaultHostnameVerifier() {
         return new HostnameVerifier() {
             @Override
             public boolean verify(String hostname, SSLSession session) {
@@ -67,9 +70,18 @@ public class Util {
         };
     }
 
-    public static String createDefaultAuthorizationHeader(String password)
+    private static String createDefaultAuthorizationHeader(String password)
             throws UnsupportedEncodingException {
         return "Basic "
                 + Base64.encodeToString(("" + ":" + password).getBytes("UTF-8"), Base64.NO_WRAP);
+    }
+
+    public static HttpsURLConnection openHttpsURLConnection(URL url, String password)
+            throws IOException {
+        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+        connection.setRequestProperty("Authorization", createDefaultAuthorizationHeader(password));
+        connection.setHostnameVerifier(createDefaultHostnameVerifier());
+        connection.setSSLSocketFactory(createDefaultSSLContext().getSocketFactory());
+        return connection;
     }
 }
